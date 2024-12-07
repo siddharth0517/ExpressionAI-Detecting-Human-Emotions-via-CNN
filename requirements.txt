@@ -1,0 +1,6 @@
+streamlit==1.25.0  # Update to the latest Streamlit version if needed
+tensorflow==2.13.0  # Replace with the TensorFlow version you're using
+opencv-python-headless==4.8.0.74  # For webcam functionality without GUI support
+numpy==1.24.3  # Replace with the version you used
+matplotlib==3.7.2  # If you used it for visualization
+pandas==1.5.3  # For data manipulation, if needed
