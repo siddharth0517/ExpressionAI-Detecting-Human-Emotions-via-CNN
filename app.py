@@ -13,25 +13,45 @@ def preprocess_frame(frame):
     resized = cv2.resize(gray, (48, 48)) / 255.0
     return np.expand_dims(resized, axis=(0, -1))
 
+# Streamlit app
 st.title("Real-Time Emotion Detection")
-run = st.checkbox("Run Webcam")
+st.text("Click the 'Start Webcam' button to begin.")
 
-if run:
-    st.text("Press 'Stop' to exit.")
-    cap = cv2.VideoCapture(0)  # Change `0` to the correct camera index if needed
+# Create a placeholder for the video feed
+video_feed = st.empty()
 
-    while run and cap.isOpened():
+# Add buttons for controlling the webcam
+start_webcam = st.button("Start Webcam")
+stop_webcam = st.button("Stop Webcam")
+
+# Start webcam feed
+if start_webcam:
+    cap = cv2.VideoCapture(0)  # 0 is the default camera index
+    st.text("Press 'Stop Webcam' to exit.")
+
+    while True:
         ret, frame = cap.read()
         if not ret:
-            st.warning("Could not access webcam.")
+            st.warning("Unable to access webcam.")
             break
 
+        # Process the frame for emotion detection
         processed_frame = preprocess_frame(frame)
         predictions = model.predict(processed_frame)
         emotion = emotion_labels[np.argmax(predictions)]
 
-        # Display prediction on frame
-        cv2.putText(frame, f'Emotion: {emotion}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        st.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), caption=f'Predicted Emotion: {emotion}')
+        # Overlay emotion prediction on the frame
+        cv2.putText(frame, f'Emotion: {emotion}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+        # Convert frame from BGR to RGB (Streamlit uses RGB)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # Display the frame in the placeholder
+        video_feed.image(frame_rgb, caption=f"Predicted Emotion: {emotion}", use_column_width=True)
+
+        # Check if the stop button was pressed
+        if stop_webcam:
+            st.text("Webcam stopped.")
+            break
 
     cap.release()
